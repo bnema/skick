@@ -1,6 +1,6 @@
 # kickstart-sveltekit
 
-Template for kickstarting a SvelteKit project.
+Template for kickstarting a SvelteKit project in 2024.
 
 With : 
 - Bun
@@ -13,3 +13,5 @@ With :
 - drizzle
 - Lucia
 - arctic
+
+Also implements the Discord OAuth flow and save user into turso db as example.
