@@ -1,7 +1,7 @@
 import { Lucia } from 'lucia';
 import { LibSQLAdapter } from '@lucia-auth/adapter-sqlite';
-import { tursoClient } from '../db/turso';
-import { GitHub, Discord } from 'arctic';
+import { tursoClient } from './db/turso';
+import { Google, Discord } from 'arctic';
 
 
 export enum Providers {
@@ -25,7 +25,7 @@ export const lucia = new Lucia(adapter, {
 	},
 	getUserAttributes: (attributes) => {
 		return {
-			githubId: attributes.github_id,
+			googleId: attributes.google_id,
 			discordId: attributes.discord_id,
 			username: attributes.username
 		};
@@ -40,32 +40,10 @@ declare module 'lucia' {
 }
 
 interface DatabaseUserAttributes {
-  github_id: string;
-  discord_id: string;
-  username: string;
+    google_id: string;
+    discord_id: string;
+    username: string;
 }
-let clientIdGithub, clientSecretGithub, redirectURIGithub
-
-if (import.meta.env.PROD) {
-	clientIdGithub = import.meta.env.VITE_GITHUB_PROD_CLIENT_ID;
-	clientSecretGithub = import.meta.env.VITE_GITHUB_PROD_CLIENT_SECRET;
-	redirectURIGithub = "https://pumuduru.io/login/github/callback"
-} else if (import.meta.env.DEV) {
-	clientIdGithub = import.meta.env.VITE_GITHUB_DEV_CLIENT_ID;
-	clientSecretGithub = import.meta.env.VITE_GITHUB_DEV_CLIENT_SECRET;
-	redirectURIGithub = "http://localhost:5173/login/github/callback"
-} else {
-	throw new Error("Environnement non valide. Veuillez définir PROD ou DEV.");
-}
-
-export const github = new GitHub(
-	clientIdGithub,
-	clientSecretGithub,
-	{
-		redirectURI: redirectURIGithub,
-	
-	}
-);
 
 let clientIdDiscord: string;
 let clientSecretDiscord: string;
@@ -80,7 +58,7 @@ if (import.meta.env.PROD) {
   clientSecretDiscord = import.meta.env.VITE_DISCORD_DEV_CLIENT_SECRET;
   redirectURIDiscord = "http://localhost:5173/login/discord/callback";
 } else {
-  throw new Error("Environnement non valide. Veuillez définir PROD ou DEV.");
+  throw new Error("NODE_ENV is not set");
 }
 
 export const discord = new Discord(

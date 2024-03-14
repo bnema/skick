@@ -14,7 +14,6 @@ export const UserTable = sqliteTable(
     id: text('id').primaryKey(),
     username: text('username').notNull(),
     email: text('email').notNull(),
-    github_id: text('github_id'),
     google_id: text('google_id'),
     discord_id: text('discord_id'),
     avatar_url: text('avatar_url'),
