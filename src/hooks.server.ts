@@ -3,6 +3,7 @@ import { redirect, type Handle } from "@sveltejs/kit";
 
 // Enum for allowed routes per provider
 enum AllowedRoutes {
+    Signup = "/signup",
     Discord = "/login/discord",
     DiscordCallback = "/login/discord/callback"
 }
