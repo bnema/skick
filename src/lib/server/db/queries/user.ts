@@ -13,21 +13,19 @@ export interface OAuthUser {
   email?: string;
 };
 
-// Append _id to the provider to get the field name
-function getProviderField(provider: Providers): string {
-  return `${provider}_id`;
-}
 
 // addUserDB is a function that adds a new user to the database
 export async function addUserDB(OAuthUser: OAuthUser, email: string | null) {
   const providerId = OAuthUser.id;
-  const providerField = getProviderField(OAuthUser.provider);
   const userId = generateId(15);
 
-  await db.execute({
-    sql: `INSERT INTO users (id, ${providerField}, username, avatar_url, email) VALUES (?, ?, ?, ?, ?)`,
-    args: [userId, providerId, OAuthUser.login, OAuthUser.avatar_url, email]
-  });
+  await db.executeMultiple(`
+  INSERT INTO users (id, username, avatar_url, email)
+  VALUES ('${userId}', '${OAuthUser.login}', '${OAuthUser.avatar_url}', '${email}');
+
+  INSERT INTO providers (id, user_id, provider, provider_id)
+  VALUES ('${generateId(15)}', '${userId}', 'discord', '${providerId}');
+`);
 
   await db.execute({
     sql: "UPDATE users SET created_at = strftime('%s', 'now'), updated_at = strftime('%s', 'now') WHERE id = ?",
@@ -37,13 +35,20 @@ export async function addUserDB(OAuthUser: OAuthUser, email: string | null) {
   return userId;
 }
 
+// add provider
+export async function addProviderDB(userID: string, provider: Providers, providerId: string) {
+  await db.execute({
+    sql: "INSERT INTO providers (id, user_id, provider, provider_id) VALUES (?, ?, ?, ?)",
+    args: [generateId(15), userID, provider, providerId]
+  });
+}
+
 // updateUserDB is a function that updates an existing user in the database
 export async function updateUserDB(OAuthUser: OAuthUser, email: string | null) {
   const providerId = OAuthUser.id;
-  const providerField = getProviderField(OAuthUser.provider);
 
   const existingUserResult = await db.execute({
-    sql: `SELECT * FROM users WHERE ${providerField} = ?`,
+    sql: "SELECT * FROM providers WHERE provider_id = ?",
     args: [providerId]
   });
 
@@ -91,8 +96,8 @@ export async function getUserBySessionID(sessionID: string) {
     id: row.id as string,
     username: row.username as string,
     email: row.email as string,
-    discord_id: row.discord_id as string | null,
-    google_id: row.google_id as string | null,
+    hashed_password: row.hashed_password as string,
+    providers: [],
     avatar_url: row.avatar_url as string | null,
     createdAt: row.created_at as number,
     updatedAt: row.updated_at as number,
