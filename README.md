@@ -1,8 +1,12 @@
 # kickstart-sveltekit
 
-Template for kickstarting a SvelteKit project in 2024.
+Template for kickstarting a SvelteKit project in 2024. 
 
-With : 
+Implement login logic for :
+- Discord's OAuth flow
+- Basic signup with email/password and code verification for the email (email service provider is not defined) 
+
+Include : 
 - Bun
 - SvelteKit 5
 - TypeScript
@@ -14,4 +18,3 @@ With :
 - Lucia
 - arctic
 
-Also implements the Discord OAuth flow and save user into turso db as example.
