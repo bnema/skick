@@ -15,18 +15,15 @@ export interface OAuthUser {
 
 
 // addUserDB is a function that adds a new user to the database
-export async function addUserDB(OAuthUser: OAuthUser, email: string | null) {
+export async function addUserDB(OAuthUser: OAuthUser, email: string | null, hashed_password: string | null) {
   const providerId = OAuthUser.id;
   const userId = generateId(15);
-
   await db.executeMultiple(`
-  INSERT INTO users (id, username, avatar_url, email)
-  VALUES ('${userId}', '${OAuthUser.login}', '${OAuthUser.avatar_url}', '${email}');
-
-  INSERT INTO providers (id, user_id, provider, provider_id)
-  VALUES ('${generateId(15)}', '${userId}', 'discord', '${providerId}');
-`);
-
+    INSERT INTO users (id, username, avatar_url, email, hashed_password, is_active)
+    VALUES ('${userId}', '${email}', '${OAuthUser.avatar_url}', '${email}', '${hashed_password}', 1);
+    INSERT INTO providers (id, user_id, provider, provider_id)
+    VALUES ('${generateId(15)}', '${userId}', '${OAuthUser.provider}', '${providerId}');
+  `);
   await db.execute({
     sql: "UPDATE users SET created_at = strftime('%s', 'now'), updated_at = strftime('%s', 'now') WHERE id = ?",
     args: [userId]
@@ -34,6 +31,8 @@ export async function addUserDB(OAuthUser: OAuthUser, email: string | null) {
 
   return userId;
 }
+
+
 
 // add provider
 export async function addProviderDB(userID: string, provider: Providers, providerId: string) {
@@ -103,6 +102,7 @@ export async function getUserBySessionID(sessionID: string) {
     updatedAt: row.updated_at as number,
     isAdmin: row.is_admin as number,
     isActive: row.is_active as number,
+    verified_email: row.verified_email as number
   };
 
   return user;
@@ -120,4 +120,28 @@ export async function getUserByID(userID: string) {
   }
 
   
+}
+
+
+// isEmailVerified is a function that checks if a user's email is verified
+export async function isEmailVerified(userID: string) {
+  const userResult = await db.execute({
+    sql: "SELECT verified_email FROM users WHERE id = ?",
+    args: [userID]
+  });
+
+  if (userResult.rows.length === 0) {
+    return false;
+  }
+
+  return userResult.rows[0].verified_email === 1;
+}
+
+
+// emailVerified is a function that sets a user's email as verified
+export async function emailVerified(userID: string) {
+  await db.execute({
+    sql: "UPDATE users SET verified_email = 1 WHERE id = ?",
+    args: [userID]
+  });
 }

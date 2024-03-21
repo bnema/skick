@@ -2,7 +2,7 @@
 import { OAuth2RequestError } from "arctic";
 import { discord, lucia, Providers } from "$lib/server/auth";
 import type { RequestEvent } from "@sveltejs/kit";
-import { type OAuthUser, addUserDB, updateUserDB } from "$lib/server/db/queries/user";
+import { type OAuthUser, addUserDB, updateUserDB, emailVerified } from "$lib/server/db/queries/user";
 
 export async function GET(event: RequestEvent): Promise<Response> {
   const code = event.url.searchParams.get("code");
@@ -56,7 +56,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
       userId = await updateUserDB(oauthUser, primaryEmail);
     } catch (e) {
       // If the user doesn't exist, create them
-      userId = await addUserDB(oauthUser, primaryEmail);
+      userId = await addUserDB(oauthUser, primaryEmail, null);
     }
 
     const session = await lucia.createSession(userId, {});
@@ -71,6 +71,10 @@ export async function GET(event: RequestEvent): Promise<Response> {
       path: "/",
       maxAge: 0
     });
+
+    // set email_verified to true since discord return the user email
+    await emailVerified(userId);
+
 
     return new Response(null, {
       status: 302,

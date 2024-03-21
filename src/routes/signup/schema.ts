@@ -20,4 +20,13 @@ export const formSchema = z.object({
     path: ["confirmPassword"],
 });
 
+export const validateEmailSchema = z.object({
+    // Refine to remove space in case or user input
+    code: z.string().length(8).refine((code) => !/\s/.test(code), {
+        message: "Code must not contain spaces.",
+    }),
+});
+
 export type FormSchema = typeof formSchema;
+export type ValidateEmailSchema = typeof validateEmailSchema;
+

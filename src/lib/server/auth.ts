@@ -7,6 +7,7 @@ import { Google, Discord } from 'arctic';
 export enum Providers {
 	DISCORD = 'discord',
 	GOOGLE = 'google',
+	EMAIL = 'email',
   }
   
 // Create a client for the database
@@ -27,7 +28,9 @@ export const lucia = new Lucia(adapter, {
 		return {
 			googleId: attributes.google_id,
 			discordId: attributes.discord_id,
-			username: attributes.username
+			username: attributes.username,
+			emailVerified: attributes.email_verified,
+			email: attributes.email,
 		};
 	}
 });
@@ -43,6 +46,8 @@ interface DatabaseUserAttributes {
     google_id: string;
     discord_id: string;
     username: string;
+	email_verified: boolean;
+	email: string;
 }
 
 let clientIdDiscord: string;

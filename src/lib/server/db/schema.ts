@@ -20,6 +20,7 @@ export const UserTable = sqliteTable(
     updatedAt: integer('updated_at').default(sql`(strftime('%s', 'now'))`),
     isAdmin: integer('is_admin').default(0),
     isActive: integer('is_active').default(1),
+    verified_email: integer('verified_email').default(0),
   },
   (table) => ({
     pk: primaryKey({ name: 'pk_users', columns: [table.id] }),
@@ -97,6 +98,7 @@ export interface User extends InferSelectModel<typeof UserTable> {
   sessions?: Session[];
   providers?: Provider[];
   emailVerifications?: EmailVerification[];
+  verified_email: number;
 }
 
 // Define the Session model
