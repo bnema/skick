@@ -118,10 +118,38 @@ export async function getUserByID(userID: string) {
   if (userResult.rows.length === 0) {
     return null;
   }
-
-  
 }
 
+// getUserByEmail is a function that gets a user by their email and return the user
+export async function getUserByEmail(email: string) {
+  const userResult = await db.execute({
+    sql: "SELECT * FROM users WHERE email = ?",
+    args: [email]
+  });
+
+  if (userResult.rows.length === 0) {
+    return null;
+  }
+
+  const row = userResult.rows[0];
+
+  // Create a User object from the row data
+  const user: User = {
+    id: row.id as string,
+    username: row.username as string,
+    email: row.email as string,
+    hashed_password: row.hashed_password as string,
+    providers: [],
+    avatar_url: row.avatar_url as string | null,
+    createdAt: row.created_at as number,
+    updatedAt: row.updated_at as number,
+    isAdmin: row.is_admin as number,
+    isActive: row.is_active as number,
+    verified_email: row.verified_email as number
+  };
+
+  return user;
+}
 
 // isEmailVerified is a function that checks if a user's email is verified
 export async function isEmailVerified(userID: string) {
