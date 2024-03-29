@@ -3,6 +3,7 @@
     import * as Form from "$lib/components/ui/form";
     import { Input } from "$lib/components/ui/input";
     import { formSchema, type FormSchema } from "./schema";
+    import { page } from '$app/stores';
     import {
       type SuperValidated,
       type Infer,
@@ -17,7 +18,7 @@
       dataType: "json",
     });
    
-    const { form: formData, enhance } = form;
+    const { form: formData, enhance, message } = form;
   </script>
 
 <h1>Sign up</h1>
@@ -47,6 +48,16 @@
       <Form.FieldErrors />
     </Form.Field>
     <Form.Button>Submit</Form.Button>
+    
+      {#if $message}
+      <div 
+        class:success={$page.status == 200} 
+        class:error={$page.status >= 400}
+      >
+        {$message}
+      </div>
+    {/if}
+
 </form>
 
 

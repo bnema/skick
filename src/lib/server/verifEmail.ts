@@ -31,7 +31,6 @@ export async function generateEmailVerificationCode(userId: string, email: strin
     sql: "INSERT INTO email_verifications (id, user_id, email, code, expires_at) VALUES (?, ?, ?, ?, ?)",
     args: [verifID, userId, email, code, createDate(new TimeSpan(15, "m")).toISOString()]
   });
-
   return code;
 }
 export async function verifyVerificationCode(user: string, code: string): Promise<boolean> {
