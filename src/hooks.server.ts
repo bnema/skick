@@ -1,5 +1,5 @@
 import { lucia } from "$lib/server/auth";
-import { redirect, type Handle } from "@sveltejs/kit";
+import { error, redirect, type Handle } from "@sveltejs/kit";
 import { isEmailVerified } from "$lib/server/db/queries/user";
 // Enum for allowed routes per provider
 enum AllowedRoutes {
@@ -55,11 +55,21 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
     }
 
-    // Vérifiez si l'email de l'utilisateur est vérifié
-    if (user && !(await isEmailVerified(user.id))) {
-        // Redirigez vers /signup/validate si l'email n'est pas vérifié
-        throw redirect(302, "/signup/validate");
+     // Validate path for email verification
+     // only allow if isEmailVerified is false (the user must validate the email)
+     if (event.url.pathname === "/signup/validate") {
+        const user = event.locals.user;
+        if (user) {
+            const isVerified = await isEmailVerified(user.id);
+            if (isVerified) {
+                // Message "Email already verified"
+                throw error(400, "Email already verified");
+            }
+        }
+       
     }
+
+
 
     event.locals.user = user;
     event.locals.session = session;

@@ -2,7 +2,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad, Actions } from './$types.js';
 import { fail } from '@sveltejs/kit';
 import { formSchema } from './schema';
-import { superValidate } from 'sveltekit-superforms';
+import { superValidate, message } from 'sveltekit-superforms';
 import { generateId } from 'lucia';
 import { type OAuthUser, addUserDB } from '$lib/server/db/queries/user.js';
 import { Argon2id } from 'oslo/password';
@@ -37,25 +37,22 @@ export const actions: Actions = {
 
    const userId= await addUserDB(user, email, hashedPassword);
 
-    const verificationCode = await generateEmailVerificationCode(userId, email);
-    console.log(verificationCode);
+   const verificationCode = await generateEmailVerificationCode(userId, email);
+    
+   console.log("verif code:", verificationCode);
+
 
     // TODO: Impl Email sending service: await sendVerificationEmail(email, verificationCode);
 
-    const session = await lucia.createSession(userId, {
-      fresh: true,
-    });
-  const cookie = lucia.createSessionCookie(session.id);
-
-  console.log("cookie", cookie);
-
-  event.cookies.set(cookie.name, cookie.value, {
-    path: ".",
-    ...cookie.attributes
-  });
+    const session = await lucia.createSession(userId, {});
+		const sessionCookie = lucia.createSessionCookie(session.id);
+		event.cookies.set(sessionCookie.name, sessionCookie.value, {
+			path: ".",
+			...sessionCookie.attributes
+		});
 
 
-
-    return { form };
-  },
+    // on success return message "Email verification code sent, please check your email"
+    return message(form, 'Email verification code sent, please check your email');
+  }
 };
